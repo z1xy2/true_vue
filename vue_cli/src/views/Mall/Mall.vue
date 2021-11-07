@@ -189,6 +189,7 @@
                   :file-list="fileList"
                   :auto-upload="false"
                   :on-success="success"
+                  :on-error="err_tip"
                   :multiple="false"
                   :http-request="httpRequest"
                 >
@@ -205,12 +206,14 @@
                   <div slot="tip" class="el-upload__tip">
                     只能上传jpg/png文件，且不超过500kb
                   </div>
-                  <div
-                    slot="tip"
-                    class="el-upload__tip"
-                    v-on="fileStatusVisible"
-                  >
-                    {{ tips }}
+                  <div>
+                    <el-alert
+                      :title="tips_title"
+                      v-show="fileStatusVisible"
+                      :type="tips_type"
+                      show-icon
+                    >
+                    </el-alert>
                   </div>
                 </el-upload>
               </div>
@@ -319,7 +322,9 @@
 export default {
   data() {
     return {
-      tips: "",
+      tips_title: "",
+      tips_type: "",
+      fileStatusVisible: false,
       checkList: [],
       input1: "",
       atomPropList: ["category", "num", "atom_name", "residues", "chain_identifier", "residues_num", "atom_lcation", "temperature", "element_symbol"],
@@ -408,7 +413,6 @@ export default {
         address: '上海市普陀区金沙江路 1518 弄'
       }],
       dialogTableVisible2: false,
-      fileStatusVisible: false,
     };
   },
   methods: {
@@ -422,8 +426,14 @@ export default {
       console.log('handlePreview');
     },
     // 上传成功时弹框
-    success(res) {
-      this.fileStatusVisible = true
+    success(response, file, fileList) {
+      console.log('success')
+      console.log(file)
+      console.log(fileList)
+    },
+    err_tip(err, file, fileList) {
+      console.log('fail')
+      console.log(err)
     },
     // 上传文件让第二次覆盖第一的文件
     handleChange(file, fileList) {
@@ -435,6 +445,7 @@ export default {
       }
     },
     httpRequest(item) {
+      var that = this
       console.log("httpRequest");
       const fd = new FormData()
       fd.append('pic', item.file)
@@ -443,8 +454,14 @@ export default {
         headers: { 'Content-Type': 'multipart/form-data' }
       };
       this.$axios.post('http://127.0.0.1:8000/doupload', fd, config).then((response) => {
+        that.fileStatusVisible = true
+        that.tips_type = 'success'
+        that.tips_title = '上传成功'
         console.log(response.data)
       }, function (err) {
+        that.fileStatusVisible = true
+        that.tips_type = 'error'
+        that.tips_title = '上传失败'
         console.log(err)
       }
       )

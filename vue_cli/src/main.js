@@ -9,7 +9,7 @@ import axios  from 'axios'
 import {
   Button, Select, Radio, Container, Aside, Header, Main, Menu, Submenu, MenuItemGroup,
   MenuItem, Dropdown, DropdownMenu, DropdownItem, Col, Row, Card, Table, TableColumn,
-  Input, Tag, Scrollbar, Upload, Dialog, CheckboxGroup, Checkbox,
+  Input, Tag, Scrollbar, Upload, Dialog, CheckboxGroup, Checkbox, Alert,
 } from 'element-ui'
 Vue.config.productionTip = false
 // Vue.component(Button.name, Button)
@@ -40,6 +40,7 @@ Vue.use(Upload)
 Vue.use(Checkbox)
 Vue.use(Dialog)
 Vue.use(CheckboxGroup)
+Vue.use(Alert)
 Vue.prototype.$axios = axios // 全局注册，使用方法为:this.$axios
 // Vue.use(ElementUI)
 new Vue({
