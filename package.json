@@ -1,8 +1,10 @@
 {
   "devDependencies": {
+    "axios": "^0.24.0",
     "babel-plugin-component": "^1.1.1"
   },
   "dependencies": {
-    "mockjs": "^1.1.0"
+    "mockjs": "^1.1.0",
+    "vue-axios": "^3.4.0"
   }
 }

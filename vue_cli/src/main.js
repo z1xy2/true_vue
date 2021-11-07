@@ -3,7 +3,7 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import http from 'axios'
+import axios  from 'axios'
 // import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
 import {
@@ -40,7 +40,7 @@ Vue.use(Upload)
 Vue.use(Checkbox)
 Vue.use(Dialog)
 Vue.use(CheckboxGroup)
-Vue.prototype.$http = http
+Vue.prototype.$axios = axios // 全局注册，使用方法为:this.$axios
 // Vue.use(ElementUI)
 new Vue({
   router,

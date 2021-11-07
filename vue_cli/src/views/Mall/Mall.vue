@@ -178,22 +178,42 @@
                   select file <i class="el-icon-folder"></i>
                 </h2>
               </div>
-              <el-upload
-                class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :before-remove="beforeRemove"
-                multiple
-                :limit="3"
-                :on-exceed="handleExceed"
-                :file-list="fileList"
-              >
-                <el-button size="small" type="primary">点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">
-                  只能上传jpg/png文件，且不超过500kb
-                </div>
-              </el-upload>
+              <div>
+                <el-upload
+                  class="upload-demo"
+                  ref="upload"
+                  action="http://127.0.0.1:8000/doupload"
+                  :on-preview="handlePreview"
+                  :on-remove="handleRemove"
+                  :on-change="handleChange"
+                  :file-list="fileList"
+                  :auto-upload="false"
+                  :on-success="success"
+                  :multiple="false"
+                  :http-request="httpRequest"
+                >
+                  <el-button slot="trigger" size="small" type="primary"
+                    >选取文件</el-button
+                  >
+                  <el-button
+                    style="margin-left: 10px"
+                    size="small"
+                    type="success"
+                    @click="submitUpload"
+                    >上传到服务器</el-button
+                  >
+                  <div slot="tip" class="el-upload__tip">
+                    只能上传jpg/png文件，且不超过500kb
+                  </div>
+                  <div
+                    slot="tip"
+                    class="el-upload__tip"
+                    v-on="fileStatusVisible"
+                  >
+                    {{ tips }}
+                  </div>
+                </el-upload>
+              </div>
             </div>
           </el-card>
           <el-card id="r2" shadow="hover">
@@ -234,16 +254,17 @@
       top="10vh"
     >
       <div>
-        <el-checkbox-group v-model="checkList">
+        <p style="display: inline-block">请选择您要下载的序列:</p>
+        <el-checkbox-group v-model="checkList" style="width: 100%">
           <el-checkbox label="类型"></el-checkbox>
           <el-checkbox label="原子序号"></el-checkbox>
           <el-checkbox label="原子名称"></el-checkbox>
-          <el-checkbox label="复选框 A"></el-checkbox>
-          <el-checkbox label="复选框 B"></el-checkbox>
-          <el-checkbox label="复选框 C"></el-checkbox>
-          <el-checkbox label="复选框 A"></el-checkbox>
-          <el-checkbox label="复选框 B"></el-checkbox>
-          <el-checkbox label="复选框 C"></el-checkbox>
+          <el-checkbox label="残基名称"></el-checkbox>
+          <el-checkbox label="链标识符"></el-checkbox>
+          <el-checkbox label="残疾序列号"></el-checkbox>
+          <el-checkbox label="原子坐标"></el-checkbox>
+          <el-checkbox label="温度因子"></el-checkbox>
+          <el-checkbox label="元素符号"></el-checkbox>
         </el-checkbox-group>
       </div>
       <el-table :data="tableData">
@@ -264,9 +285,13 @@
         </el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="centerDialogVisible = false">取 消</el-button>
+        <el-button
+          @click="dialogTableVisible = false"
+          style="margin-right: 50px"
+          >取 消</el-button
+        >
         <el-button type="primary" @click="centerDialogVisible = false"
-          >确 定</el-button
+          >下 载</el-button
         >
       </span>
     </el-dialog>
@@ -294,6 +319,7 @@
 export default {
   data() {
     return {
+      tips: "",
       checkList: [],
       input1: "",
       atomPropList: ["category", "num", "atom_name", "residues", "chain_identifier", "residues_num", "atom_lcation", "temperature", "element_symbol"],
@@ -345,7 +371,7 @@ export default {
         name: '王小虎',
         address: '上海市普陀区金沙江路 1519 弄'
       }],
-      fileList: [{ name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }, { name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100' }],
+      fileList: [],
       gridData: [{
         date: '2016-05-02',
         name: '王小虎',
@@ -382,20 +408,46 @@ export default {
         address: '上海市普陀区金沙江路 1518 弄'
       }],
       dialogTableVisible2: false,
+      fileStatusVisible: false,
     };
   },
   methods: {
+    submitUpload() {
+      this.$refs.upload.submit();
+    },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      console.log('handlePreview');
     },
     handlePreview(file) {
-      console.log(file);
+      console.log('handlePreview');
     },
-    handleExceed(files, fileList) {
-      this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+    // 上传成功时弹框
+    success(res) {
+      this.fileStatusVisible = true
     },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
+    // 上传文件让第二次覆盖第一的文件
+    handleChange(file, fileList) {
+      console.log('========')
+      console.log(file)
+      console.log(fileList)
+      if (fileList.length > 0) {
+        this.fileList = [fileList[fileList.length - 1]]
+      }
+    },
+    httpRequest(item) {
+      console.log("httpRequest");
+      const fd = new FormData()
+      fd.append('pic', item.file)
+      fd.append('title', 'test')
+      const config = {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
+      this.$axios.post('http://127.0.0.1:8000/doupload', fd, config).then((response) => {
+        console.log(response.data)
+      }, function (err) {
+        console.log(err)
+      }
+      )
     }
   }
 };
